@@ -3,12 +3,26 @@ from scraper import CoreAPI, ArxivAPI, CrossRefAPI
 from llm import ChatGLMClient
 from translate import BaiduTranslateClient
 from api_manager import database as db
+import config as cfg
 import requests
 import os
 import re
+from tkinter import filedialog, Tk
 
 # 创建存储论文的文件夹
-storage_path = "./storage/papers"
+if cfg.storage_path is None:
+    root = Tk()
+    root.withdraw()  # 隐藏主窗口
+    storage_path = filedialog.askdirectory(title="请选择保存论文的文件夹")
+    root.destroy()
+else:
+    storage_path = cfg.storage_path
+
+if not storage_path:
+    print("未选择保存路径，程序退出。")
+    exit()
+
+storage_path = storage_path + "/papers"
 os.makedirs(storage_path, exist_ok=True)
 
 # 初始化 ChatGLMClient
@@ -79,12 +93,13 @@ for paper in unique_papers:
         # 将标题中的非中英文字符替换为下划线
         sanitized_title = re.sub(r'[^\w一-鿿]+', '_', title)
         filename = os.path.join(storage_path, f"{sanitized_title}.pdf")
-        response = requests.get(pdf_link)
-        if response.status_code == 200:
+        try:
+            response = requests.get(pdf_link)
+            response.raise_for_status()
             with open(filename, 'wb') as f:
                 f.write(response.content)
                 print(f"论文已下载: {filename}")
-        else:
-            print(f"无法下载论文: {filename}")
+        except requests.RequestException as e:
+            print(f"无法下载论文: {filename}, 错误信息: {e}")
     elif download != 'y':
         print("跳过下载该论文。")

@@ -1,5 +1,7 @@
 import api_manager.database as db
 
+storage_path = None
+
 db.insert_api_key(api_name="Baidu Translate", app_id="20240227001975820", secret_key="wRu2MkC9BM44Hyo35Jmo",
                   base_url="https://fanyi-api.baidu.com/api/trans/vip/translate")
 db.insert_api_key(api_name="ChatGLM", api_key="4d701b71cb8f865ee09048d83a16de25.Yg7yClqiDqNOVMTy",
